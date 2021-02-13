@@ -29,9 +29,15 @@ dev_dependencies:
   intent: ^1.4.0
   audio_service: ^0.16.2
   admob_flutter:
+    
   
 # dependency_overrides:
 #   crypto: ^2.0.0
 flutter:
 
   uses-material-design: true
+
+
+flutter_native_splash:
+  image: assets/images/splashscreen.jpg
+  color: '#CFD8DC'

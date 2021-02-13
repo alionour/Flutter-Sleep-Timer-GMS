@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
    <application
-        android:label="flutter_t"
+        android:label="Flutter Sleep Timer"
         android:icon="@mipmap/ic_launcher">
         android:usesCleartextTraffic="true"
          
