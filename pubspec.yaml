@@ -29,8 +29,12 @@ dev_dependencies:
   intent: ^1.4.0
   audio_service: ^0.16.2
   admob_flutter:
+  flutter_launcher_icons:
     
-  
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/icon.png"
 # dependency_overrides:
 #   crypto: ^2.0.0
 flutter:
