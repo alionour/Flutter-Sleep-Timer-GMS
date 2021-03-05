@@ -5,6 +5,12 @@ import 'package:audio_session/audio_session.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:system_shortcuts/system_shortcuts.dart';
+import 'package:flutter_t/Globals.dart';
+import 'package:audio_service/audio_service.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_t/Notifications/NotificationHandler.dart';
 
 class HomeController extends GetxController {
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey();
@@ -13,23 +19,25 @@ class HomeController extends GetxController {
   AdmobBannerSize bannerSize;
   AdmobInterstitial interstitialAdStartTimer;
   AdmobInterstitial interstitialAdEndTimer;
-
+  var appData = GetStorage();
   AdmobReward rewardAd;
 
   //////////////////////////////////////////
 
   VolumeControl volumeController;
   double currentVolume;
-  var duration = Duration(seconds: 59).obs;
+  var duration = Duration(minutes: 1).obs;
   Timer timer;
   Timer countdownTimer;
   var millisec = 0.obs;
-  var endValue = 90.0.obs;
+  var endValue = 91.0.obs;
   var timerButtonText = "Start Timer".obs;
   var enableDragging = true.obs;
   // var color  = Colors.greenAccent.
   Action action = Action.start;
   Future<void> startSleepTimer() async {
+    await FlutterLocalNotificationsPlugin().cancelAll();
+    appData.write("minutes", duration.value.inMinutes);
     print("clicked");
     if (action == Action.start) {
       interstitialAdStartTimer.show();
@@ -41,11 +49,16 @@ class HomeController extends GetxController {
       await session.configure(AudioSessionConfiguration.music());
       millisec.value = duration.value.inMilliseconds;
       print(millisec);
-      countdownTimer = Timer.periodic(Duration(milliseconds: 200), (timer) {
+      int progress = 0;
+      countdownTimer =
+          Timer.periodic(Duration(milliseconds: 1000), (timer) async {
+        progress += 1000;
         if (millisec.value != 0) {
-          millisec.value -= 200;
+          millisec.value -= 1000;
+          NotificationHandler.notifyTimerNotifications(timer, duration);
         }
       });
+
       endValue.value = millisec.value / 1000 / 60;
       timer = Timer(duration.value, () async {
         if (await session.setActive(true,
@@ -57,24 +70,34 @@ class HomeController extends GetxController {
           enableDragging.value = true;
           timerButtonText.value = "Start Timer";
           update();
-          endValue.value = 90;
+          endValue.value = appData.read("end_value") ?? 91;
           countdownTimer.cancel();
 
           action = Action.start;
           duration.value = Duration(seconds: 59);
+          NotificationHandler.finishTimerNotifications(timer, duration);
+          goToHome
+              ? await SystemShortcuts.home()
+              : printInfo(info: "Not going to home");
           interstitialAdEndTimer.show();
         } else {}
       });
     } else if (action == Action.cancel) {
       timer.cancel();
       countdownTimer.cancel();
-      endValue.value = 90;
-      timerButtonText.value = "Start Timer";
+      endValue.value = appData.read("end_value") ?? 91;
       enableDragging.value = true;
+
+      timerButtonText.value = "Start Timer";
       action = Action.start;
-      duration.value = Duration(seconds: 59);
+      // duration.value = Duration(seconds: 59);
+      // millisec.value = duration.value.inMilliseconds;
       print("cancelled");
-      // update();
+      print(duration.value);
+      print(millisec.value);
+      print(double.parse((millisec.value / 1000 / 60).toString()));
+      NotificationHandler.cancelTimerNotifications(timer, duration);
+      // await FlutterLocalNotificationsPlugin().cancelAll();
     }
   }
 
@@ -91,7 +114,9 @@ class HomeController extends GetxController {
     // You should execute `Admob.requestTrackingAuthorization()` here before showing any ad.
 
     // bannerSize = AdmobBannerSize.BANNER;
-
+    duration.value = Duration(minutes: appData.read("minutes") ?? 1);
+    millisec.value = duration.value.inMilliseconds;
+    endValue.value = appData.read("end_value") ?? 91;
     interstitialAdStartTimer = AdmobInterstitial(
       adUnitId: getInterstitialAdUnitIdStartTimer(),
       listener: (AdmobAdEvent event, Map<String, dynamic> args) {
@@ -234,3 +259,17 @@ iOS: ca-app-pub-3940256099942544/1712485313
 }
 
 enum Action { start, cancel }
+
+startBackgroundTask() async {
+  print("herwe1");
+  await AudioService.connect();
+  await AudioService.start(backgroundTaskEntrypoint: () {
+    HomeController().startSleepTimer();
+    print("herer  in");
+  });
+  print("calld");
+  // AudioServiceBackground.setState(
+  //     playing: true,
+  //     processingState: AudioServiceBackground.state.processingState,
+  //     controls: null);
+}

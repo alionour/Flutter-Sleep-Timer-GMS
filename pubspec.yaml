@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none' 
 
-version: 1.0.0+1
+version: 1.0.3+2003
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -30,6 +30,12 @@ dev_dependencies:
   audio_service: ^0.16.2
   admob_flutter:
   flutter_launcher_icons:
+  system_shortcuts: ^1.0.0
+  get_storage:
+  flutter_local_notifications: ^4.0.1
+  move_to_background:
+
+  
     
 flutter_icons:
   android: "launcher_icon"
