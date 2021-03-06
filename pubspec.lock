@@ -125,6 +125,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_background:
+    dependency: "direct dev"
+    description:
+      name: flutter_background
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.6"
   flutter_cache_manager:
     dependency: transitive
     description:

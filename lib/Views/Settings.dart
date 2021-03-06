@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_t/Controllers/SettingsController.dart';
-import 'package:flutter_t/Themes/DarkTheme.dart';
-import 'package:flutter_t/Themes/LightTheme.dart';
 import 'package:get/get.dart';
 import 'package:flutter_t/Globals.dart';
 import 'package:get_storage/get_storage.dart';

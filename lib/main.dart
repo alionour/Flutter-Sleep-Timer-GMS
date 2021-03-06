@@ -8,10 +8,14 @@ import 'package:get/get.dart';
 import 'package:flutter_t/Globals.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 BuildContext appContext;
 
 void main() async {
+  // To keep app running and losing activity on android
+  FlutterBackground.initialize();
+  FlutterBackground.enableBackgroundExecution();
   // App Data
   await GetStorage.init();
   // Notifications

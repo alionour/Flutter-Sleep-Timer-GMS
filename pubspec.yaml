@@ -34,6 +34,7 @@ dev_dependencies:
   get_storage:
   flutter_local_notifications: ^4.0.1
   move_to_background:
+  flutter_background:
 
   
     
