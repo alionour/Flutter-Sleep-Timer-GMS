@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none' 
 
-version: 1.0.3+2003
+version: 1.0.4+2004
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -28,13 +28,15 @@ dev_dependencies:
   volume_control:
   intent: ^1.4.0
   audio_service: ^0.16.2
-  admob_flutter:
+  admob_flutter: 
   flutter_launcher_icons:
   system_shortcuts: ^1.0.0
   get_storage:
   flutter_local_notifications: ^4.0.1
   move_to_background:
-  flutter_background:
+  flutter_background: ^1.0.0
+  workmanager: ^0.4.1
+  # google_mobile_ads: ^0.13.0
 
   
     

@@ -53,7 +53,7 @@ class NotificationHandler {
     }
   }
 
-  static finishTimerNotifications(timer, duration) async {
+  static void finishTimerNotifications(timer, duration) async {
     if (notification) {
       AndroidNotificationDetails androidNotificationDetails =
           AndroidNotificationDetails("2003", "Sleep Timer", "Timer is On",

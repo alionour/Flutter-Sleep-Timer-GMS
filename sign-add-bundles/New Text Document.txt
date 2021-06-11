@@ -1,0 +1,1 @@
+java -jar D:\Tutorial\flutter_sleep_timer_gms\sign add bundles\pepk.jar --keystore D:\Tutorial\flutter_sleep_timer_gms\sign add bundles\key.jks --alias key--output=output.zip --encryptionkey=034200041E224EE22B45D19B23DB91BA9F52DE0A06513E03A5821409B34976FDEED6E0A47DBA48CC249DD93734A6C5D9A0F43461F9E140F278A5D2860846C2CF5D2C3C02 --include-cert

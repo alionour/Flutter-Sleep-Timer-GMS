@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:volume_control/volume_control.dart';
 import 'package:admob_flutter/admob_flutter.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:audio_session/audio_session.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
@@ -11,91 +12,102 @@ import 'package:audio_service/audio_service.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_t/Notifications/NotificationHandler.dart';
+import 'package:workmanager/workmanager.dart';
 
 class HomeController extends GetxController {
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey();
   ///////////////////////////////////////////
   /// Ads
-  AdmobBannerSize bannerSize;
+  // AdmobBannerSize bannerSize;
+  // Rx<BannerAd> homeBanner;
+  RxBool isBannerAdLoaded = false.obs;
+  // InterstitialAd appStartInterstitial;
   AdmobInterstitial interstitialAdStartTimer;
   AdmobInterstitial interstitialAdEndTimer;
   var appData = GetStorage();
-  AdmobReward rewardAd;
-
+  // AdmobReward rewardAd;
   //////////////////////////////////////////
 
   VolumeControl volumeController;
   double currentVolume;
-  var duration = Duration(minutes: 1).obs;
+  var duration = Duration().obs;
   Timer timer;
   Timer countdownTimer;
-  var millisec = 0.obs;
+  Rx<Duration> durationInMilliseconds = Duration().obs;
   var endValue = 91.0.obs;
   var timerButtonText = "Start Timer".obs;
   var enableDragging = true.obs;
-  // var color  = Colors.greenAccent.
   Action action = Action.start;
+
   Future<void> startSleepTimer() async {
     await FlutterLocalNotificationsPlugin().cancelAll();
     appData.write("minutes", duration.value.inMinutes);
-    print("clicked");
+    printInfo(info: "clicked");
     if (action == Action.start) {
-      interstitialAdStartTimer.show();
       timerButtonText.value = "Cancel Timer";
       enableDragging.value = false;
       update();
       action = Action.cancel;
       final session = await AudioSession.instance;
       await session.configure(AudioSessionConfiguration.music());
-      millisec.value = duration.value.inMilliseconds;
-      print(millisec);
+      durationInMilliseconds.value = duration.value;
+      print(durationInMilliseconds.value);
+      // ignore: unused_local_variable
       int progress = 0;
       countdownTimer =
           Timer.periodic(Duration(milliseconds: 1000), (timer) async {
         progress += 1000;
-        if (millisec.value != 0) {
-          millisec.value -= 1000;
+        if (durationInMilliseconds.value.inMilliseconds != 0) {
+          durationInMilliseconds.value = Duration(
+              milliseconds: durationInMilliseconds.value.inMilliseconds - 1000);
           NotificationHandler.notifyTimerNotifications(timer, duration);
         }
       });
 
-      endValue.value = millisec.value / 1000 / 60;
+      endValue.value = durationInMilliseconds.value.inMilliseconds / 1000 / 60;
+      Workmanager().registerOneOffTask(
+        "start",
+        "request_audio_focus",
+        inputData: {"seconds": duration.value.inSeconds},
+      );
       timer = Timer(duration.value, () async {
         if (await session.setActive(true,
             avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions(1),
             androidAudioFocusGainType: AndroidAudioFocusGainType.gain)) {
           print("end");
-
           await session.setActive(false);
           enableDragging.value = true;
           timerButtonText.value = "Start Timer";
           update();
           endValue.value = appData.read("end_value") ?? 91;
           countdownTimer.cancel();
+          Workmanager().cancelByUniqueName("start");
 
           action = Action.start;
-          duration.value = Duration(seconds: 59);
+          duration.value = Duration(seconds: appData.read('minutes'));
           NotificationHandler.finishTimerNotifications(timer, duration);
           goToHome
               ? await SystemShortcuts.home()
               : printInfo(info: "Not going to home");
-          interstitialAdEndTimer.show();
-        } else {}
+          // interstitialAdEndTimer.show();
+        }
       });
     } else if (action == Action.cancel) {
+      Workmanager().cancelByUniqueName("start");
       timer.cancel();
       countdownTimer.cancel();
       endValue.value = appData.read("end_value") ?? 91;
       enableDragging.value = true;
-
       timerButtonText.value = "Start Timer";
       action = Action.start;
       // duration.value = Duration(seconds: 59);
       // millisec.value = duration.value.inMilliseconds;
+      durationInMilliseconds.value = duration.value;
+
       print("cancelled");
       print(duration.value);
-      print(millisec.value);
-      print(double.parse((millisec.value / 1000 / 60).toString()));
+      // print(millisec.value);
+      // print(double.parse((millisec.value / 1000 / 60).toString()));
       NotificationHandler.cancelTimerNotifications(timer, duration);
       // await FlutterLocalNotificationsPlugin().cancelAll();
     }
@@ -106,16 +118,42 @@ class HomeController extends GetxController {
     interstitialAdStartTimer.dispose();
     interstitialAdEndTimer.dispose();
     // rewardAd.dispose();
+    // homeBanner.value.dispose();
+    // appStartInterstitial.dispose();
     super.dispose();
   }
 
   @override
   void onInit() {
+    // final BannerAd banner = BannerAd(
+    //   // adUnitId: getBannerAdUnitId(),
+    //   adUnitId: BannerAd.testAdUnitId,
+    //   size: AdSize.banner,
+    //   request: AdRequest(),
+    //   listener: BannerAdListener(onAdLoaded: (Ad ad) {
+    //     homeBanner.value = ad as BannerAd;
+    //     isBannerAdLoaded.value = true;
+    //   }),
+    // )..load();
+
+    // InterstitialAd.load(
+    //   adUnitId: getInterstitialAdUnitIdStartTimer(),
+    //   request: AdRequest(),
+    //   adLoadCallback:
+    //       InterstitialAdLoadCallback(onAdLoaded: (InterstitialAd ad) {
+    //     this.appStartInterstitial = ad;
+    //   }, onAdFailedToLoad: (LoadAdError error) {
+    //     printError(info: error.toString());
+    //   }),
+    // ).then((value) {
+    //   appStartInterstitial?.show();
+    // });
     // You should execute `Admob.requestTrackingAuthorization()` here before showing any ad.
 
+    Future.delayed(Duration(seconds: 5), () => interstitialAdStartTimer.show());
     // bannerSize = AdmobBannerSize.BANNER;
     duration.value = Duration(minutes: appData.read("minutes") ?? 1);
-    millisec.value = duration.value.inMilliseconds;
+    durationInMilliseconds.value = duration.value;
     endValue.value = appData.read("end_value") ?? 91;
     interstitialAdStartTimer = AdmobInterstitial(
       adUnitId: getInterstitialAdUnitIdStartTimer(),
@@ -148,11 +186,16 @@ class HomeController extends GetxController {
   }
 
   void showSnackBar(String content) {
-    scaffoldState.currentState.showSnackBar(
-      SnackBar(
-        content: Text(content),
-        duration: Duration(milliseconds: 1500),
-      ),
+    // scaffoldState.currentState.showSnackBar(
+    //   SnackBar(
+    //     content: Text(content),
+    //     duration: Duration(milliseconds: 1500),
+    //   ),
+    // );
+    Get.snackbar(
+      "Notification",
+      content,
+      duration: Duration(milliseconds: 1500),
     );
   }
 
@@ -187,7 +230,8 @@ class HomeController extends GetxController {
                 ),
               ),
               onWillPop: () async {
-                scaffoldState.currentState.hideCurrentSnackBar();
+                // scaffoldState.currentState.hideCurrentSnackBar();
+                Get.back();
                 return true;
               },
             );
@@ -248,14 +292,15 @@ iOS: ca-app-pub-3940256099942544/1712485313
     }
     return null;
   }
-  // String getRewardBasedVideoAdUnitId() {
-  //   if (Platform.isIOS) {
-  //     return 'ca-app-pub-3940256099942544/1712485313';
-  //   } else if (Platform.isAndroid) {
-  //     return 'ca-app-pub-3940256099942544/5224354917';
-  //   }
-  //   return null;
-  // }
+
+  String getRewardBasedVideoAdUnitId() {
+    if (Platform.isIOS) {
+      return 'ca-app-pub-3940256099942544/1712485313';
+    } else if (Platform.isAndroid) {
+      return 'ca-app-pub-3940256099942544/5224354917';
+    }
+    return null;
+  }
 }
 
 enum Action { start, cancel }

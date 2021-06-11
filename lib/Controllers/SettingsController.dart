@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_t/Globals.dart';
 
 class SettingsController extends GetxController {
   var scaffoldTitle = "Settings".obs;

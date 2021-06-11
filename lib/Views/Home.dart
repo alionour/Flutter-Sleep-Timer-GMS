@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:flutter_t/Controllers/HomeController.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:admob_flutter/admob_flutter.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'Settings.dart';
 import 'package:flutter_t/Globals.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:flutter_background/flutter_background.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -15,6 +17,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     context.theme;
@@ -61,34 +68,57 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ],
                                 pointers: <GaugePointer>[
                                   NeedlePointer(
-                                    value: double.parse(
-                                        (controller.millisec.value / 1000 / 60)
-                                            .toString()),
-                                    needleColor: isDarkTheme
-                                        ? Colors.greenAccent
-                                        : Colors.pinkAccent,
-                                    enableDragging:
-                                        controller.enableDragging.value,
-                                    tailStyle: TailStyle(color: Colors.red),
-                                    onValueChanging:
-                                        (ValueChangingArgs valueChangingArgs) {
-                                      controller.duration.value = Duration(
-                                          minutes:
-                                              valueChangingArgs.value.toInt(),
-                                          seconds: int.parse(valueChangingArgs
-                                              .value
-                                              .toString()
-                                              .split(".")[1][1]));
-                                      controller.millisec.value = controller
-                                          .duration.value.inMilliseconds;
-                                    },
-                                  ),
+                                      value: double.parse((controller
+                                                  .durationInMilliseconds
+                                                  .value
+                                                  .inMilliseconds /
+                                              1000 /
+                                              60)
+                                          .toString()),
+                                      needleColor: isDarkTheme
+                                          ? Colors.greenAccent
+                                          : Colors.pinkAccent,
+                                      enableDragging:
+                                          controller.enableDragging.value,
+                                      tailStyle: TailStyle(color: Colors.red),
+                                      onValueChanging: (ValueChangingArgs
+                                          valueChangingArgs) {
+                                        // if (valueChangingArgs.value <= 1) {
+                                        //   controller.duration.value =
+                                        //       Duration(minutes: 1);
+                                        //   controller
+                                        //           .durationInMilliseconds.value =
+                                        //       Duration(milliseconds: 1000);
+                                        //   print(controller.duration.value);
+                                        // } else {
+                                        controller.duration.value = Duration(
+                                            minutes:
+                                                valueChangingArgs.value.toInt(),
+                                            // seconds: int.tryParse(valueChangingArgs
+                                            //     .value
+                                            //     .toString()
+                                            //     .split(".").elementAt(1)[1]),
+                                            seconds: ((double.tryParse("0." +
+                                                        (valueChangingArgs
+                                                                    .value /
+                                                                60)
+                                                            .toString()
+                                                            .split('.')
+                                                            ?.elementAt(1)) *
+                                                    60)
+                                                .round()));
+                                        controller.durationInMilliseconds
+                                            .value = controller.duration.value;
+                                      }
+                                      // },
+                                      ),
                                 ],
                                 annotations: <GaugeAnnotation>[
                                   GaugeAnnotation(
                                       widget: Container(
                                           child: Text(
-                                              "${(controller.millisec.value ~/ 1000 ~/ 60).toStringAsFixed(2)}",
+                                              // "${(controller.durationInMilliseconds.value.inMilliseconds ~/ 1000 ~/ 60).toStringAsFixed(2)}",
+                                              "${controller.durationInMilliseconds.value.inMinutes}.${((double.tryParse("0." + (controller.durationInMilliseconds.value.inSeconds / 60).toString().split('.')?.elementAt(1)) * 60).round())}",
                                               style: TextStyle(
                                                   fontSize: 25,
                                                   color: isDarkTheme
@@ -103,101 +133,58 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       Flexible(
-                        child: RaisedButton(
+                        child: ElevatedButton(
                             child: Text(
                               controller.timerButtonText.value,
                               style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold),
                             ),
-                            color: isDarkTheme
-                                ? Colors.greenAccent
-                                : Colors.pinkAccent,
+                            style: ButtonStyle(
+                              backgroundColor: isDarkTheme
+                                  ? MaterialStateProperty.all(
+                                      Colors.greenAccent)
+                                  : MaterialStateProperty.all(
+                                      Colors.pinkAccent),
+                            ),
                             onPressed: () {
-                              print("clicked");
-
-                              // startBackgroundTask();
-                              print("finished");
-                              controller.startSleepTimer();
+                              if (controller.duration.value.inSeconds < 1) {
+                                Get.snackbar(
+                                    "Note", "Timer Can not be started");
+                              } else {
+                                controller.startSleepTimer();
+                              }
                             }),
                       ),
                       Flexible(
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(4, (index) {
-                            var label;
-                            Color color;
-                            int minutes;
-                            switch (index) {
-                              case 0:
-                                label = "+1";
-                                color = isDarkTheme
-                                    ? Colors.greenAccent
-                                    : Colors.pinkAccent;
-                                minutes = 1;
-                                break;
-                              case 1:
-                                label = "+5";
-                                color = isDarkTheme
-                                    ? Colors.greenAccent
-                                    : Colors.pinkAccent;
-                                minutes = 5;
-
-                                break;
-                              case 2:
-                                label = "-1";
-                                color = Colors.pink[400];
-                                minutes = -1;
-
-                                break;
-                              case 3:
-                                label = "-5";
-                                color = Colors.pink[400];
-                                minutes = -5;
-
-                                break;
-
-                              default:
-                                label = "";
-                            }
-                            return Flexible(
-                              flex: 1,
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: RaisedButton(
-                                    color: color,
-                                    child: Text(
-                                      label ?? "",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    onPressed: () {
-                                      print(controller.duration.value);
-                                      if (controller.duration.value.inMinutes <=
-                                          1) {
-                                      } else {
-                                        if (controller
-                                                .duration.value.inMinutes >=
-                                            90) {
-                                          controller.endValue.value = controller
-                                                  .duration.value.inMinutes +
-                                              1.0;
-                                          controller.appData.write("end_value",
-                                              controller.endValue.value);
-                                        } else {}
-                                        controller.duration.value = Duration(
-                                            minutes: controller
-                                                    .duration.value.inMinutes +
-                                                minutes);
-                                        controller.millisec.value = controller
-                                            .duration.value.inMilliseconds;
-
-                                        print(controller.duration.value);
-                                      }
-                                    }),
-                              ),
-                            );
-                          }),
-                        ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TimerButton(
+                                  color: isDarkTheme
+                                      ? Colors.greenAccent
+                                      : Colors.pinkAccent,
+                                  text: "+1",
+                                  duration: Duration(minutes: 1),
+                                  action: "increment"),
+                              TimerButton(
+                                  color: isDarkTheme
+                                      ? Colors.greenAccent
+                                      : Colors.pinkAccent,
+                                  text: "+5",
+                                  duration: Duration(minutes: 5),
+                                  action: "increment"),
+                              TimerButton(
+                                  color: Colors.pink,
+                                  text: "-1",
+                                  duration: Duration(minutes: -1),
+                                  action: "decrement"),
+                              TimerButton(
+                                  color: Colors.pink,
+                                  text: "-5",
+                                  duration: Duration(minutes: -5),
+                                  action: "decrement"),
+                            ]),
                       ),
                     ],
                   ),
@@ -208,6 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       adUnitId: controller.getBannerAdUnitId(),
                     ),
                   ),
+
                   Positioned(
                     top: 25,
                     left: 10,
@@ -220,11 +208,84 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPressed: () {
                           Get.to(Settings());
                         }),
-                  )
+                  ),
+                  // if (controller.isBannerAdLoaded.value)
+                  //   Positioned(
+                  //     bottom: 0,
+                  //     height:
+                  //         controller.homeBanner.value.size.height.toDouble(),
+                  //     width: controller.homeBanner.value.size.width.toDouble(),
+                  //     child: AdWidget(ad: controller.homeBanner.value),
+                  //   ),
                 ],
               ),
+              // child: (controller.isBannerAdLoaded.value)
+              //     ? Positioned(
+              //         bottom: 0,
+              //         height:
+              //             controller.homeBanner.value.size.height.toDouble(),
+              //         width: controller.homeBanner.value.size.width.toDouble(),
+              //         child: AdWidget(ad: controller.homeBanner.value),
+              //       )
+              //     : Container(),
             ),
           ),
         ));
+  }
+}
+
+class TimerButton extends StatelessWidget {
+  final Color color;
+  final String text;
+  final Duration duration;
+  final String action;
+  TimerButton({Key key, this.color, this.text, this.duration, this.action})
+      : super(key: key);
+
+  final HomeController controller = Get.find();
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      flex: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(color),
+              // shape:MaterialStateProperty.all(CircleBorder())
+            ),
+            child: Text(
+              text ?? "",
+              style: TextStyle(color: Colors.white),
+            ),
+            onPressed: () {
+              print(controller.duration.value);
+              if (controller.duration.value.inSeconds <= 60 &&
+                  action == "decrement" &&
+                  duration.inSeconds == -60) {
+                Get.snackbar("Note", "Timer Can be setted");
+                return;
+              } else if (controller.duration.value.inSeconds <= 300 &&
+                  action == "decrement" &&
+                  duration.inSeconds == -300) {
+                Get.snackbar("Note", "Timer Can be setted");
+                return;
+              } else {
+                if (controller.duration.value.inSeconds >= (5400)) {
+                  controller.endValue.value =
+                      controller.duration.value.inSeconds + 60.0;
+                  controller.appData
+                      .write("end_value", controller.endValue.value);
+                } //else{}
+                controller.duration.value = Duration(
+                    seconds: controller.durationInMilliseconds.value.inSeconds +
+                        duration.inSeconds);
+                controller.durationInMilliseconds.value =
+                    controller.duration.value;
+                print(controller.duration.value);
+              }
+            }),
+      ),
+    );
   }
 }
