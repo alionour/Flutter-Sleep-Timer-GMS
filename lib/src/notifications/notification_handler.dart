@@ -1,13 +1,15 @@
 import 'dart:async';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:flutter/material.dart';
-import 'package:sleep_timer/src/globals.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:sleep_timer/src/app/services/navigation/navigation.dart';
 
 class NotificationHandler {
   static void cancelTimerNotifications(Timer timer, Duration duration) async {
-    if (notification.value) {
+    if (NavigatorService.settingsBloc.state.notification) {
       AndroidNotificationDetails androidNotificationDetails =
-          AndroidNotificationDetails("2003", "Sleep Timer", "Timer is On",
+          AndroidNotificationDetails('2003', 'Sleep Timer',
+              channelDescription: 'Timer is On',
               importance: Importance.high,
               priority: Priority.high,
               ongoing: false,
@@ -22,18 +24,19 @@ class NotificationHandler {
           NotificationDetails(android: androidNotificationDetails);
       await FlutterLocalNotificationsPlugin().show(
           4,
-          "Sleep Timer",
-          "Timer is cancelled ${(timer.tick / 60).toStringAsFixed(2)} Minutes",
+          'Sleep Timer',
+          'Timer is cancelled ${(timer.tick / 60).toStringAsFixed(2)} Minutes',
           notificationDetails,
-          payload: "Item x");
+          payload: 'Item x');
     }
   }
 
   static void notifyTimerNotifications(Timer timer, Duration duration) async {
-    if (notification.value) {
-      logger.d("${timer.tick}  ${duration.inSeconds}");
+    if (NavigatorService.settingsBloc.state.notification) {
+      // log('${timer.tick}  ${duration.inSeconds}');
       AndroidNotificationDetails androidNotificationDetails =
-          AndroidNotificationDetails("2003", "Sleep Timer", "Timer is On",
+          AndroidNotificationDetails('2003', 'Sleep Timer',
+              channelDescription: 'Timer is On',
               importance: Importance.high,
               priority: Priority.high,
               ongoing: true,
@@ -42,7 +45,7 @@ class NotificationHandler {
               progress: timer.tick,
               maxProgress: duration.inSeconds,
               styleInformation: BigTextStyleInformation(
-                  "Remaining " + duration.toString().split('.')[0]),
+                  "Remaining ${duration.toString().split('.')[0]}"),
               largeIcon:
                   const DrawableResourceAndroidBitmap('mipmap/launcher_icon'),
               // ticker: duration.toString().split('.')[0],
@@ -52,16 +55,17 @@ class NotificationHandler {
               playSound: false);
       NotificationDetails notificationDetails =
           NotificationDetails(android: androidNotificationDetails);
-      await FlutterLocalNotificationsPlugin().show(4, "Sleep Timer",
+      await FlutterLocalNotificationsPlugin().show(4, 'Sleep Timer',
           "Remaining ${duration.toString().split('.')[0]}", notificationDetails,
-          payload: "Item x");
+          payload: 'Item x');
     }
   }
 
   static void finishTimerNotifications(Timer timer, Duration duration) async {
-    if (notification.value) {
+    if (NavigatorService.settingsBloc.state.notification) {
       AndroidNotificationDetails androidNotificationDetails =
-          const AndroidNotificationDetails("2003", "Sleep Timer", "Timer is on",
+          const AndroidNotificationDetails('2003', 'Sleep Timer',
+              channelDescription: 'Timer is On',
               importance: Importance.high,
               priority: Priority.high,
               ongoing: false,
@@ -75,8 +79,8 @@ class NotificationHandler {
       NotificationDetails notificationDetails =
           NotificationDetails(android: androidNotificationDetails);
       await FlutterLocalNotificationsPlugin().show(
-          4, "Sleep Timer", "Timer has finished", notificationDetails,
-          payload: "Item x");
+          4, 'Sleep Timer', 'Timer has finished', notificationDetails,
+          payload: 'Item x');
     }
   }
 

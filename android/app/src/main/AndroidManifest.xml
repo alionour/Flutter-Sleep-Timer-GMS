@@ -11,13 +11,16 @@
         <data android:scheme="https" />
       </intent>
     </queries>
+
    <application
         android:label="Sleep Timer"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true" >
+        
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
+            android:exported="true"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -59,6 +62,14 @@
             <action android:name="android.intent.action.MEDIA_BUTTON" />
           </intent-filter>
         </receiver>
-        
+            <receiver android:name="device.policy.manager.DeviceAdmin" android:permission="android.permission.BIND_DEVICE_ADMIN">
+      <meta-data android:name="android.app.device_admin" android:resource="@xml/policies" />
+      
+      <intent-filter android:exported="true">
+          <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+          <action android:name="android.app.action.ACTION_DEVICE_ADMIN_DISABLE_REQUESTED" />
+          <action android:name="android.app.action.ACTION_DEVICE_ADMIN_DISABLED" />
+      </intent-filter>
+  </receiver>
     </application>
 </manifest>

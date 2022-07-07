@@ -5,7 +5,7 @@ class TouchIndicator extends StatefulWidget {
   const TouchIndicator({Key? key, required this.child}) : super(key: key);
 
   @override
-  _TouchIndicatorState createState() => _TouchIndicatorState();
+  State<TouchIndicator> createState() => _TouchIndicatorState();
 }
 
 class _TouchIndicatorState extends State<TouchIndicator> {
