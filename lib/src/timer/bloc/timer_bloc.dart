@@ -55,7 +55,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     on<ResumeTimer>(_onResumeTimer);
     on<ChangeGaugeRange>(_onGaugeRangeChanged);
     on<ExtendTimer>(_onTimerExtend);
-    on<DecrementDuration>(_onDurationChanged);
+    on<ChangeCountdownDuration>(_onCountdownDurationChanged);
 
     _startAudioSession();
   }
@@ -123,21 +123,21 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     emit(state.copyWith(
         countdownTimer:
             Timer.periodic(const Duration(milliseconds: 1000), (timer) async {
-      add(DecrementDuration(const Duration(milliseconds: 1000), timer));
+      add(ChangeCountdownDuration(const Duration(milliseconds: 1000), timer));
     })));
   }
 
-  void _onDurationChanged(
-      DecrementDuration event, Emitter<TimerState> emit) async {
+  void _onCountdownDurationChanged(
+      ChangeCountdownDuration event, Emitter<TimerState> emit) async {
     if (state.countdownDuration.inMilliseconds > 1000) {
+      NotificationHandler.notifyTimerNotifications(
+          event.timer, state.countdownDuration);
       emit(
         state.copyWith(
           timerStatus: TimerStatus.running,
           countdownDuration: state.countdownDuration - event.duration,
         ),
       );
-
-      NotificationHandler.notifyTimerNotifications(event.timer, event.duration);
     }
     // else if (state.countdownDuration.inMilliseconds < 1000) {
     //   await Future.delayed(state.countdownDuration).then((value) {
@@ -197,11 +197,27 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   void _onTimerFinished(FinishTimer event, Emitter<TimerState> emit) async {
     await fadeOutAudio();
-    if (await session.setActive(true,
+    await session.setActive(true,
         avAudioSessionSetActiveOptions: const AVAudioSessionSetActiveOptions(1),
-        androidAudioFocusGainType: AndroidAudioFocusGainType.gain)) {}
+        androidAudioFocusGainType:
+            AndroidAudioFocusGainType.gainTransientExclusive,
+        fallbackConfiguration: const AudioSessionConfiguration(
+          avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.allowBluetooth,
+          avAudioSessionMode: AVAudioSessionMode.spokenAudio,
+          avAudioSessionRouteSharingPolicy:
+              AVAudioSessionRouteSharingPolicy.defaultPolicy,
+          avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
+          androidAudioAttributes: AndroidAudioAttributes(
+            contentType: AndroidAudioContentType.speech,
+            flags: AndroidAudioFlags.none,
+            usage: AndroidAudioUsage.voiceCommunication,
+          ),
+          androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
+          androidWillPauseWhenDucked: true,
+        ));
     logger.d('Sleeping');
-    // await session.setActive(false);
 
     // resetting [countdownTimer] and  [stopWatch]
     state.countdownTimer.cancel();
@@ -213,6 +229,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     add(GoToHome());
     add(SetSilent());
     add(TurnScreenOff());
+    turnOffBluetooth();
+    turnOffWifi();
     // interstitialAdEndTimer.show();
     _cancelTimerBackgroundTask('start');
 
@@ -225,6 +243,12 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         dragEnabled: true,
         timerStatus: TimerStatus.stopped,
         countdownDuration: duration));
+    // Future.delayed(
+    //     const Duration(
+    //       seconds: 3,
+    //     ), () {
+    //   VolumeControl.setVolume(100);
+    // });
   }
 
   void _cancelTimerBackgroundTask(String taskName) {
@@ -248,6 +272,34 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       /// Make the device lock immediately, as if the lock screen timeout has expired at the point of this call.
       /// After this method is called, the device must be unlocked using strong authentication (PIN, pattern, or password).
       await DevicePolicyManager.lockNow().then((value) => log('locked'));
+    }
+  }
+
+  void turnOffWifi() async {
+    log('turning screen off');
+    try {
+      if (_settingsBloc.state.turnOffWifi) {
+        final isChecked = await SystemShortcuts.checkWifi;
+        if (isChecked ?? false) {
+          await SystemShortcuts.wifi();
+        }
+      }
+    } catch (e) {
+      log('error while turning off wifi: $e');
+    }
+  }
+
+  void turnOffBluetooth() async {
+    log('turning bluetooth screen off');
+    try {
+      if (_settingsBloc.state.turnOffBluetooth) {
+        final isChecked = await SystemShortcuts.checkBluetooth;
+        if (isChecked ?? false) {
+          await SystemShortcuts.bluetooth();
+        }
+      }
+    } catch (e) {
+      log('error while turning off bluetooth: $e');
     }
   }
 
@@ -286,7 +338,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   /// turn screen off
   void _onTurnOffScreen(TurnScreenOff event, Emitter<TimerState> emit) {
-    if (_settingsBloc.state.notification) {
+    if (_settingsBloc.state.turnOffScreen) {
       turnScreenOff();
     }
   }

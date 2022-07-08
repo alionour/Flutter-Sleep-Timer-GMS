@@ -11,6 +11,8 @@ const silentModeKey = 'silentMode';
 const languageCodeKey = 'languageCode';
 const notificationsOnKey = 'notificationsOn';
 const turnOffScreenKey = 'turnOffScreen';
+const turnOffWifiKey = 'turnOffWifi';
+const turnOffBluetoothKey = 'turnOffBluetooth';
 
 /// A service that stores and retrieves user settings.
 ///
@@ -67,6 +69,33 @@ class SettingsService {
     // Use the shared_preferences package to persist settings locally or the
     // http package to persist settings over the network.
     await _settingsBox.put(turnOffScreenKey, value);
+  }
+
+  Future<bool> get turnOffWifi async {
+    final turnOffWifi = await _settingsBox.get(turnOffWifiKey) as bool? ?? true;
+    log('wifi$turnOffWifi');
+    return turnOffWifi;
+  }
+
+  /// Persists the user's preferred ThemeData to local or remote storage.
+  Future<void> updateTurnOffWifi(bool value) async {
+    // Use the shared_preferences package to persist settings locally or the
+    // http package to persist settings over the network.
+    await _settingsBox.put(turnOffWifiKey, value);
+  }
+
+  Future<bool> get turnOffBluetooth async {
+    final turnOffBluetooth =
+        await _settingsBox.get(turnOffBluetoothKey) as bool? ?? true;
+    log('bluetooth on$turnOffBluetooth');
+    return turnOffBluetooth;
+  }
+
+  /// Persists the user's preferred ThemeData to local or remote storage.
+  Future<void> updateTurnOffBluetooth(bool value) async {
+    // Use the shared_preferences package to persist settings locally or the
+    // http package to persist settings over the network.
+    await _settingsBox.put(turnOffBluetoothKey, value);
   }
 
   Future<bool> get runInBackground async {

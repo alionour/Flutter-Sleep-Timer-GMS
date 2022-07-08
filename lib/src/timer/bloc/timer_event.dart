@@ -79,11 +79,11 @@ class ChangeGaugeRange extends TimerEvent {
   List<Object> get props => [valueChangingArgs];
 }
 
-class DecrementDuration extends TimerEvent {
+class ChangeCountdownDuration extends TimerEvent {
   final Duration duration;
   final Timer timer;
 
-  const DecrementDuration(this.duration, this.timer);
+  const ChangeCountdownDuration(this.duration, this.timer);
   @override
   List<Object> get props => [duration, timer];
 }

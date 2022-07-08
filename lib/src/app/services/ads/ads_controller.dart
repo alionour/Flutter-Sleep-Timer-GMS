@@ -38,6 +38,9 @@ class AdsController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  late final Widget homeAdWidget = AdWidget(
+    ad: homeBanner,
+  );
   final BannerAd homeBanner = BannerAd(
     adUnitId: getBannerAdUnitId(),
     size: AdSize.banner,

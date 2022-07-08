@@ -63,3 +63,17 @@ class ChangeNotificationsOn extends SettingsEvent {
   @override
   List<Object?> get props => [notificationsOn];
 }
+
+class ChangeWifi extends SettingsEvent {
+  final bool turnOffWifi;
+  const ChangeWifi(this.turnOffWifi);
+  @override
+  List<Object?> get props => [turnOffWifi];
+}
+
+class ChangeBluetooth extends SettingsEvent {
+  final bool turnOffBluetooth;
+  const ChangeBluetooth(this.turnOffBluetooth);
+  @override
+  List<Object?> get props => [turnOffBluetooth];
+}

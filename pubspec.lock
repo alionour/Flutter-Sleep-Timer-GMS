@@ -49,7 +49,7 @@ packages:
       name: audio_session
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.8"
+    version: "0.1.9"
   bloc:
     dependency: "direct main"
     description:
@@ -339,6 +339,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
+  lecle_system_shortcuts:
+    dependency: "direct main"
+    description:
+      name: lecle_system_shortcuts
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   lint:
     dependency: transitive
     description:
@@ -542,6 +549,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.3"
+  responsive_framework:
+    dependency: "direct main"
+    description:
+      name: responsive_framework
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   rxdart:
     dependency: transitive
     description:
@@ -574,7 +588,7 @@ packages:
       name: sqflite
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2+1"
+    version: "2.0.3"
   sqflite_common:
     dependency: transitive
     description:

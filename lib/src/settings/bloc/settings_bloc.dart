@@ -31,6 +31,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
             runInBackground: true,
             silentMode: false,
             turnOffScreen: false,
+            turnOffBluetooth: false,
+            turnOffWifi: false,
           ),
         ) {
     on<ChangeThemeData>(_onThemDataChange);
@@ -42,6 +44,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<ChangeRunInBackground>(_onRunInBackgroundChanged);
     on<ResetToDefault>(_onResetToDefault);
     on<ChangeTurnOffScreen>(_onTurnOffScreenChanged);
+    on<ChangeBluetooth>(_onTurnOffBluetoothChanged);
+    on<ChangeWifi>(_onTurnOffWifiChanged);
 
     // Load the user's preferred theme while the splash screen is displayed.
     // This prevents a sudden theme change when the app is first displayed.
@@ -62,15 +66,21 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final silentMode = await _settingsService.silentMode;
     final notificationsOn = await _settingsService.notificationsOn;
     final turnOffScreen = await _settingsService.turnOffScreen;
+    final turnOffWifi = await _settingsService.turnOffWifi;
+    final turnOffBluetooth = await _settingsService.turnOffBluetooth;
     // Important! Inform listeners a change has occurred.
-    emit(state.copyWith(
-        appTheme: appTheme,
-        goToHome: goToHome,
-        languageCode: languageCode,
-        notification: notificationsOn,
-        runInBackground: runInBackground,
-        silentMode: silentMode,
-        turnOffScreen: turnOffScreen));
+    emit(
+      state.copyWith(
+          appTheme: appTheme,
+          goToHome: goToHome,
+          languageCode: languageCode,
+          notification: notificationsOn,
+          runInBackground: runInBackground,
+          silentMode: silentMode,
+          turnOffScreen: turnOffScreen,
+          turnOffBluetooth: turnOffBluetooth,
+          turnOffWifi: turnOffWifi),
+    );
     log('loaded settings');
   }
 
@@ -212,6 +222,26 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         _settingsService.updateTurnOffScreen(event.turnOffScreen);
       }
       emit(state.copyWith(turnOffScreen: event.turnOffScreen));
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  void _onTurnOffWifiChanged(
+      ChangeWifi event, Emitter<SettingsState> emit) async {
+    try {
+      _settingsService.updateTurnOffWifi(event.turnOffWifi);
+
+      emit(state.copyWith(turnOffWifi: event.turnOffWifi));
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  void _onTurnOffBluetoothChanged(
+      ChangeBluetooth event, Emitter<SettingsState> emit) async {
+    try {
+      emit(state.copyWith(turnOffBluetooth: event.turnOffBluetooth));
     } catch (e) {
       log(e.toString());
     }

@@ -18,13 +18,15 @@ Duration parseDuration(String durationString) {
 
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 void showSnackBar(String content) {
-  final height =
-      MediaQuery.of(scaffoldMessengerKey.currentContext!).size.height;
   scaffoldMessengerKey.currentState?.showSnackBar(
     SnackBar(
       content: Row(
         children: [
-          const Flexible(child: Icon(Icons.notification_important_outlined)),
+          const Flexible(
+              child: Icon(
+            Icons.notification_important_outlined,
+            color: Colors.white,
+          )),
           const Flexible(
             child: SizedBox(
               width: 5,

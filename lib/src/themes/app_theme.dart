@@ -18,6 +18,10 @@ abstract class AppTheme extends Equatable {
     /// this part to make some characteristics same between all themes
     this.theme = theme.copyWith(
       cardColor: palette.cardColor,
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: palette.appBarColor,
+        contentTextStyle: const TextStyle(color: Colors.white),
+      ),
       dialogTheme: DialogTheme(
           backgroundColor: palette.appBarColor,
           titleTextStyle: const TextStyle(

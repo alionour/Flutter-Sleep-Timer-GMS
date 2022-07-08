@@ -42,6 +42,8 @@ dependencies:
   get: ^4.6.5
   go_router: ^4.1.0
   provider: ^6.0.3
+  responsive_framework: ^0.2.0
+  lecle_system_shortcuts: ^0.0.1
 
 dev_dependencies:
   flutter_test:

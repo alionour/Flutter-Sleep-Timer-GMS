@@ -84,6 +84,7 @@ class AppOpenAdManager {
       _appOpenAd!.show();
     } catch (e) {
       log('Error showing ad: $e');
+      rethrow;
     }
   }
 

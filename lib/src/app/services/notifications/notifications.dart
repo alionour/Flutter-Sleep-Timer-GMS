@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:get/get.dart';
-import 'package:sleep_timer/src/app/app.dart';
+import 'package:sleep_timer/src/app/services/navigation/navigator_service.dart';
+import 'package:sleep_timer/src/home/view/home.dart';
 
 Future<void> initializeNotifications() async {
   // Notifications
@@ -17,5 +17,5 @@ Future<void> initializeNotifications() async {
 }
 
 Future onSelectionNotification(payload) async {
-  Get.to(() => const MyApp());
+  NavigatorService.go(HomePage.routeName);
 }

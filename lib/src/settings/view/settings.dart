@@ -29,9 +29,8 @@ class _SettingsPageState extends State<SettingsPage> {
           elevation: 0,
           title: Text(
             'Settings'.tr,
-            // style: TextStyle(
-            //   color: isDarkTheme.value ? Colors.white : Colors.greenAccent,
-            // ),
+            style:
+                TextStyle(color: Theme.of(context).appBarTheme.backgroundColor),
             textAlign: TextAlign.center,
           ),
           centerTitle: true,
@@ -177,36 +176,80 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     BlocBuilder<SettingsBloc, SettingsState>(
                       builder: (context, state) {
-                        return ListTile(
-                          leading: const Icon(Icons.home_filled),
-                          title: Text('GoToHomeScreen'.tr),
-                          trailing: Switch(
-                              value: state.goToHome,
-                              onChanged: (value) =>
-                                  settingBloc.add(ChangeGoToHomeScreen(value))),
+                        return Tooltip(
+                          message: 'go to home screen after finishing timer.',
+                          triggerMode: TooltipTriggerMode.tap,
+                          child: ListTile(
+                            leading: const Icon(Icons.home_filled),
+                            title: Text('GoToHomeScreen'.tr),
+                            trailing: Switch(
+                                value: state.goToHome,
+                                onChanged: (value) => settingBloc
+                                    .add(ChangeGoToHomeScreen(value))),
+                          ),
                         );
                       },
                     ),
                     BlocBuilder<SettingsBloc, SettingsState>(
                         builder: (context, state) {
-                      return ListTile(
-                        leading: const Icon(Icons.screen_lock_portrait_rounded),
-                        title: Text('TurnOffScreen'.tr),
-                        trailing: Switch(
-                            value: state.turnOffScreen,
-                            onChanged: (value) =>
-                                settingBloc.add(ChangeTurnOffScreen(value))),
+                      return Tooltip(
+                        message: 'turns screen off after finishing timer.',
+                        triggerMode: TooltipTriggerMode.tap,
+                        child: ListTile(
+                          leading:
+                              const Icon(Icons.screen_lock_portrait_rounded),
+                          title: Text('TurnOffScreen'.tr),
+                          trailing: Switch(
+                              value: state.turnOffScreen,
+                              onChanged: (value) =>
+                                  settingBloc.add(ChangeTurnOffScreen(value))),
+                        ),
                       );
                     }),
                     BlocBuilder<SettingsBloc, SettingsState>(
                         builder: (context, state) {
-                      return ListTile(
-                        leading: const Icon(Icons.do_not_disturb_alt_rounded),
-                        title: Text('SilentMode'.tr),
-                        trailing: Switch(
-                            value: state.silentMode,
-                            onChanged: (value) =>
-                                settingBloc.add(ChangeSilentMode(value))),
+                      return Tooltip(
+                        message:
+                            'sets phone to silent mode after finishing timer.',
+                        triggerMode: TooltipTriggerMode.tap,
+                        child: ListTile(
+                          leading: const Icon(Icons.do_not_disturb_alt_rounded),
+                          title: Text('SilentMode'.tr),
+                          trailing: Switch(
+                              value: state.silentMode,
+                              onChanged: (value) =>
+                                  settingBloc.add(ChangeSilentMode(value))),
+                        ),
+                      );
+                    }),
+                    BlocBuilder<SettingsBloc, SettingsState>(
+                        builder: (context, state) {
+                      return Tooltip(
+                        message: 'turn off wifi after finishing timer.',
+                        triggerMode: TooltipTriggerMode.tap,
+                        child: ListTile(
+                          leading: const Icon(Icons.signal_wifi_off_rounded),
+                          title: Text('TurnOffWifi'.tr),
+                          trailing: Switch(
+                              value: state.turnOffWifi,
+                              onChanged: (value) =>
+                                  settingBloc.add(ChangeWifi(value))),
+                        ),
+                      );
+                    }),
+                    BlocBuilder<SettingsBloc, SettingsState>(
+                        builder: (context, state) {
+                      return Tooltip(
+                        message: 'turn off Bluetooth after finishing timer.',
+                        triggerMode: TooltipTriggerMode.tap,
+                        child: ListTile(
+                          leading: const Icon(Icons.do_not_disturb_alt_rounded),
+                          title: Text('TurnOffBluetooth'.tr),
+                          trailing: Switch(
+                              value: state.turnOffBluetooth,
+                              onChanged: (value) =>
+                                  settingBloc.add(ChangeBluetooth(value))),
+                        ),
                       );
                     }),
                   ],

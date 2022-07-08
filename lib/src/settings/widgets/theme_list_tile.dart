@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sleep_timer/src/settings/bloc/settings_bloc.dart';
 
@@ -14,8 +15,11 @@ class _ThemeListTileState extends State<ThemeListTile> {
   Widget build(BuildContext context) {
     final settingsBloc = context.read<SettingsBloc>();
     return ExpansionTile(
-        leading: const Icon(Icons.color_lens),
-        title: const Text('Theme'),
+        leading: Icon(
+          Icons.color_lens,
+          color: Theme.of(context).iconTheme.color,
+        ),
+        title: Text('Theme'.tr),
         children: [
           SizedBox(
             width: settingsBloc.themes.length * 80,
