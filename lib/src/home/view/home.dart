@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:lecle_system_shortcuts/lecle_system_shortcuts.dart';
+import 'package:sleep_timer/src/app/services/ads/ads_controller.dart';
 import 'package:sleep_timer/src/app/services/ads/open_app_ad.dart';
+import 'package:sleep_timer/src/app/services/rate_app/rate_app.dart';
 import 'package:sleep_timer/src/home/bloc/home_bloc.dart';
 import 'package:sleep_timer/src/home/view/home_landscape.dart';
 import 'package:sleep_timer/src/home/view/home_portrait.dart';
@@ -41,12 +44,19 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    appOpenAdManager.showAdIfAvailable();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await initializeRateMyApp();
+      if (mounted) {
+        showRateDialog(context);
+      }
+      appOpenAdManager.showAdIfAvailable();
+    });
   }
 
   late final AppLifecycleReactor _appLifecycleReactor =
       AppLifecycleReactor(appOpenAdManager: appOpenAdManager);
 
+  final AdsController _adsController = Get.put(AdsController());
   final HomeBloc _homeBloc = HomeBloc();
   final TimerBloc _timerBloc = TimerBloc();
   @override

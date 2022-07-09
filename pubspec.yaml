@@ -44,6 +44,8 @@ dependencies:
   provider: ^6.0.3
   responsive_framework: ^0.2.0
   lecle_system_shortcuts: ^0.0.1
+  rate_my_app: ^1.1.3
+  in_app_review: ^2.0.4
 
 dev_dependencies:
   flutter_test:
