@@ -87,3 +87,67 @@ void onStart(ServiceInstance service) async {
     }
   });
 }
+
+enum HomeTimerWidgetAction {
+  start,
+  reset,
+  pause,
+  idle;
+
+  static HomeTimerWidgetAction action(String? value) {
+    switch (value) {
+      case 'start_timer':
+        return HomeTimerWidgetAction.start;
+      case 'reset_timer':
+        return HomeTimerWidgetAction.reset;
+      case 'pause_timer':
+        return HomeTimerWidgetAction.pause;
+      default:
+        return HomeTimerWidgetAction.idle;
+    }
+  }
+}
+
+/// Called when Doing Background Work initiated from Widget
+void backgroundCallback(Uri? data) async {
+  print('data$data');
+  switch (HomeTimerWidgetAction.action(data?.host)) {
+    case HomeTimerWidgetAction.start:
+      break;
+
+    case HomeTimerWidgetAction.pause:
+      break;
+
+    case HomeTimerWidgetAction.reset:
+      break;
+    default:
+  }
+  // if (HomeTimerWidgetAction.action(data?.host) == HomeTimerWidgetAction.start) {
+  //   await HomeWidget.saveWidgetData<String>('title', '');
+  //   await HomeWidget.updateWidget(
+  //       name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
+  // }
+}
+
+/// Used for Background Updates using Workmanager Plugin
+// void callbackDispatcher() {
+//   Workmanager().executeTask((taskName, inputData) {
+//     final now = DateTime.now();
+//     return Future.wait<bool>([
+//       HomeWidget.saveWidgetData(
+//         'title',
+//         'Updated from Background',
+//       ) as Future<bool>,
+//       HomeWidget.saveWidgetData(
+//         'message',
+//         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
+//       ) as Future<bool>,
+//       HomeWidget.updateWidget(
+//         name: 'HomeWidgetExampleProvider',
+//         iOSName: 'HomeWidgetExample',
+//       ) as Future<bool>,
+//     ]).then((value) {
+//       return !value.contains(false);
+//     });
+//   });
+// }
