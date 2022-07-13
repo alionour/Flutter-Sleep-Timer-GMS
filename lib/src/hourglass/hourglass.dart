@@ -7,7 +7,7 @@ class HourglassView extends StatefulWidget {
   const HourglassView({Key? key}) : super(key: key);
 
   @override
-  _HourglassViewState createState() => _HourglassViewState();
+  State<HourglassView> createState() => _HourglassViewState();
 }
 
 class _HourglassViewState extends State<HourglassView> {
@@ -143,7 +143,7 @@ class Led extends StatefulWidget {
       : super(key: key);
 
   @override
-  _LedState createState() => _LedState();
+  State<Led> createState() => _LedState();
 }
 
 class _LedState extends State<Led> {
@@ -153,10 +153,10 @@ class _LedState extends State<Led> {
       width: widget.width,
       height: widget.height,
       alignment: Alignment.center,
-      child: Text(widget.ledId.toString()),
       decoration: BoxDecoration(
           color: widget.isOn ? Colors.pinkAccent : Colors.grey,
           borderRadius: BorderRadius.circular(5)),
+      child: Text(widget.ledId.toString()),
     );
   }
 }

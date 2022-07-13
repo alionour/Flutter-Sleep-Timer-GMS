@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -41,7 +41,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.ali.nourmed.sleep_timer"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
@@ -54,6 +54,7 @@ android {
            storePassword keystoreProperties['storePassword']
        }}
     buildTypes {
+
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
@@ -75,4 +76,9 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:multidex:1.0.3'
-    }
+    // implementation 'net.crosp.libs.android:circle-time-view:1.0.6'
+    //    implementation 'com.github.lzyzsd:circleprogress:1.2.4'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.github.Gruzer:simple-gauge-android:0.3.1'
+
+}

@@ -17,13 +17,13 @@ class HourglassController extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     startTimer();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -31,7 +31,7 @@ class HourglassController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeMetrics() {
     orientation.value = Get.mediaQuery.orientation;
-    WidgetsBinding.instance?.addPersistentFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPersistentFrameCallback((timeStamp) {
       orientation.value = Get.mediaQuery.orientation;
     });
   }

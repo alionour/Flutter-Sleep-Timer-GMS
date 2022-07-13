@@ -10,9 +10,35 @@
          This theme determines the color of the Android Window while your
          Flutter UI initializes, as well as behind your Flutter UI while its
          running.
-         
+
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+
+
+    <!-- Base application theme. --> for app widget
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+
+    <style name="ShapeAppearanceOverlay.MyApp.Button.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="Widget.Android.AppWidget.Container" parent="android:Widget">
+        <item name="android:id">@android:id/background</item>
+        <item name="android:background">?android:attr/colorBackground</item>
+    </style>
+
+    <style name="Widget.Android.AppWidget.InnerView" parent="android:Widget">
+        <item name="android:background">?android:attr/colorBackground</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 </resources>
