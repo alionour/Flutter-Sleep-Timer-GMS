@@ -26,7 +26,8 @@ void callBackDispatcher() {
                 ? await SystemShortcuts.home()
                 : logger.d('Not going to home');
             NavigatorService.settingsBloc.state.notification
-                ? TurnScreenOff()
+                ? TimerBloc
+                    .turnScreenOff() // todo add event instead of this workaround
                 : logger.d('Failed to turn screen off');
             // interstitialAdEndTimer.show();
             if (NavigatorService.settingsBloc.state.silentMode) {

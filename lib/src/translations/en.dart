@@ -18,4 +18,8 @@ Map<String, String> en = {
   'GeneralSettings': 'General Settings',
   'TimerSettings': 'Timer Settings',
   'SilentMode': 'Silent Mode',
+  'Theme': 'Theme',
+  'TurnOffWifi': 'Turn Off Wifi',
+  'TurnOffBluetooth': 'Turn Off Bluetooth',
+  'HomeWidgetTimerDuration': 'Home Widget Timer Duration',
 };

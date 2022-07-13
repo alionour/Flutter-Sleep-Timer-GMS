@@ -6,140 +6,144 @@ import 'package:bloc/bloc.dart';
 import 'package:device_policy_manager/device_policy_manager.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:pausable_timer/pausable_timer.dart';
-import 'package:provider/provider.dart';
-import 'package:sleep_timer/src/app/services/navigation/navigator_service.dart';
+import 'package:sleep_timer/src/app/services/background_tasks/services/timer_service.dart';
 import 'package:sleep_timer/src/globals.dart';
 import 'package:sleep_timer/src/notifications/notification_handler.dart';
 import 'package:sleep_timer/src/settings/bloc/settings_bloc.dart';
-import 'package:sleep_timer/src/timer/services/timer_local_storage.dart';
+import 'package:sleep_timer/src/timer/bloc/timer_bloc.dart';
 import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:system_shortcuts/system_shortcuts.dart';
 import 'package:volume_control/volume_control.dart';
 import 'package:workmanager/workmanager.dart';
 
-part 'timer_event.dart';
-part 'timer_state.dart';
+part 'home_widget_timer_event.dart';
+part 'home_widget_timer_state.dart';
 
-enum TimerStatus {
-  running,
-  stopped,
-  paused,
-  cancelled;
+class HomeWidgetTimerBloc
+    extends Bloc<HomeWidgetTimerEvent, HomeWidgetTimerState> {
+  HomeWidgetTimerBloc()
+      : super(HomeWidgetTimerInitial(
+          timerStatus: TimerStatus.stopped,
+          countdownDuration: const Duration(seconds: 30),
+          countdownTimer: Timer(const Duration(seconds: 30), () {}),
+          sleepTimer: PausableTimer(const Duration(seconds: 30), () {}),
+          stopwatch: Stopwatch(),
+        )) {
+    on<StartHomeWidgetTimer>(_onStartTimer);
+    on<StopHomeWidgetTimer>(_onStopTimer);
+    on<PauseHomeWidgetTimer>(_onPauseTimer);
+    on<StartHomeWidgetCountdown>(_onStarCountdown);
+    on<StartHomeWidgetStopwatch>(_onStopwatchStarted);
 
-  static TimerStatus status(String value) {
-    switch (value) {
-      case 'running':
-        return TimerStatus.running;
-      case 'stopped':
-        return TimerStatus.stopped;
-      case 'paused':
-        return TimerStatus.paused;
-      case 'cancelled':
-        return TimerStatus.cancelled;
-      default:
-        return TimerStatus.stopped;
-    }
-  }
+    on<FinishHomeWidgetTimer>(_onTimerFinished);
+    on<CancelHomeWidgetTimer>(_onTimerCanceled);
+    on<ResetHomeWidgetTimer>(_onTimerReset);
+    on<HomeWidgetSetSilent>(_onSetSilent);
+    on<HomeWidgetTurnScreenOff>(_onTurnOffScreen);
+    on<HomeWidgetGoToHome>(_onGoToHome);
+    on<ResumeHomeWidgetTimer>(_onResumeTimer);
 
-  String get statusToString {
-    switch (this) {
-      case TimerStatus.running:
-        return 'running';
-      case TimerStatus.stopped:
-        return 'stopped';
-      case TimerStatus.paused:
-        return 'paused';
-      case TimerStatus.cancelled:
-        return 'cancelled';
-      default:
-        return 'stopped';
-    }
-  }
-}
-
-const initialDuration = Duration(minutes: 91);
-
-class TimerBloc extends Bloc<TimerEvent, TimerState> {
-  bool isRunningFromHomeWidget;
-  TimerBloc({this.isRunningFromHomeWidget = false})
-      : super(
-          HomeInitial(
-            timerStatus: TimerStatus.stopped,
-            countdownDuration: initialDuration,
-            dragEnabled: true,
-            stopwatch: Stopwatch(),
-            gaugeEndValue: initialDuration.inSeconds.toDouble() / 60,
-            countdownTimer: Timer(initialDuration, () {}),
-            sleepTimer: PausableTimer(initialDuration, () {}),
-            valueChangingArgs: ValueChangingArgs(),
-          ),
-        ) {
-    on<StartTimer>(_onStartTimer);
-    on<StopTimer>(_onStopTimer);
-    on<PauseTimer>(_onPauseTimer);
-    on<StartCountdown>(_onStarCountdown);
-    on<StartStopwatch>(_onStopwatchStarted);
-    on<SetGaugeEndValue>(_onSettingGaugeEndValue);
-    on<FinishTimer>(_onTimerFinished);
-    on<CancelTimer>(_onTimerCanceled);
-    on<ResetTimer>(_onTimerReset);
-    on<SetSilent>(_onSetSilent);
-    on<TurnScreenOff>(_onTurnOffScreen);
-    on<GoToHome>(_onGoToHome);
-    on<ResumeTimer>(_onResumeTimer);
-    on<ChangeGaugeRange>(_onGaugeRangeChanged);
-    on<ExtendTimer>(_onTimerExtend);
-    on<ChangeCountdownDuration>(_onCountdownDurationChanged);
+    on<ChangeHomeWidgetCountdownDuration>(_onCountdownDurationChanged);
 
     _startAudioSession();
+    on<ChangeHomeWidgetTimerState>(_onTimerStateChanged);
+    stream.listen((state) {
+      add(const ChangeHomeWidgetTimerState());
+    });
+  }
+  final HomeWidgetTimerService _timerService = HomeWidgetTimerService();
+  // late TimerBloc timerBloc = TimerBloc(isRunningFromHomeWidget: true)
+  //   ..stream.listen((timerState) {
+  //     add(ChangeHomeWidgetTimerState(timerState: timerState));
+  //   });
+
+  void _onTimerStateChanged(ChangeHomeWidgetTimerState event,
+      Emitter<HomeWidgetTimerState> emit) async {
+    final currentDuration = state.sleepTimer.duration - state.countdownDuration;
+
+    final progress = (currentDuration.inMilliseconds * 100) /
+        state.sleepTimer.duration.inMilliseconds;
+
+    _timerService.saveWidgetTimer(
+      duration: state.countdownDuration,
+      progress: progress,
+      status: state.timerStatus,
+      timerDuration: state.sleepTimer.duration,
+    );
+
+    _timerService.updateWidget();
+    emit(
+      state.copyWith(
+        timerStatus: state.timerStatus,
+        countdownDuration: state.countdownDuration,
+        countdownTimer: state.countdownTimer,
+        sleepTimer: state.sleepTimer,
+        stopwatch: state.stopwatch,
+      ),
+    );
+    log('''timer countdown ${state.countdownDuration}''');
+    log('''timer active ${state.countdownTimer.isActive}''');
+    log('''timer duration ${state.sleepTimer.duration}''');
+    log('''timer current $currentDuration''');
+    log('''timer status ${state.timerStatus}''');
+
+    log('home timer state : timer duration =${state.sleepTimer.duration}');
+    log('home timer state : current duration =${state.countdownDuration}');
   }
 
-  final _timerService = TimerService();
+  final _homeWidgettimerService = HomeWidgetTimerService();
 
-  void _onStartTimer(StartTimer event, Emitter<TimerState> emit) async {
-    if (event.duration.inSeconds < 1) {
-      showSnackBar('TimerCannotBeStarted'.tr);
-    } else {
-      NotificationHandler.cancelAllNotifications();
+  void _onStartTimer(
+      StartHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) async {
+    print('_onTimerStarted');
+    if (state.timerStatus == TimerStatus.stopped ||
+        state.timerStatus == TimerStatus.cancelled) {
+      await _timerService.getWidgetTimer().then(
+        (value) {
+          print('home timervalue ${value.timerDuration}');
+          if (value.duration.inSeconds < 1) {
+            log('Cannot start timer, Timer duration should be bigger than 1 second');
+            return;
+          } else {
+            log('Starting Home Widget Timer');
 
-      /// save duration of timer to local storage
-      _timerService.updateDuration(event.duration);
+            add(const StartHomeWidgetStopwatch());
+            add(StartHomeWidgetCountdown(value.duration));
 
-      add(const StartStopwatch());
-      add(StartCountdown(
-        event.duration,
-      ));
+            _startTimerBackground(value.duration, 'homeWidget');
 
-      _startTimerBackground(event.duration, 'app');
+            final sleepTimer = PausableTimer(value.duration, () async {
+              logger.d('Timer has benn finished');
+              add(FinishHomeWidgetTimer(
+                duration: value.duration,
+              ));
+            })
+              ..start();
 
-      final sleepTimer = PausableTimer(event.duration, () async {
-        logger.d('Timer has been finished');
-        add(FinishTimer(
-          duration: event.duration,
-        ));
-      })
-        ..start();
-      emit(
-        state.copyWith(
-            sleepTimer: sleepTimer,
-            dragEnabled: false,
-            timerStatus: TimerStatus.running),
+            emit(
+              state.copyWith(
+                  sleepTimer: sleepTimer, timerStatus: TimerStatus.running),
+            );
+          }
+        },
       );
+    } else {
+      add(const ResumeHomeWidgetTimer());
     }
+    // Event source is used to determine if the timer
+    // was started from the home widget or from the settings widget.
   }
 
-  void _onPauseTimer(PauseTimer event, Emitter<TimerState> emit) {
+  void _onPauseTimer(
+      PauseHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) {
     logger.d('Pausing timer');
     state.sleepTimer.pause();
     state.stopwatch.stop();
     state.countdownTimer.cancel();
     _cancelTimerBackgroundTask();
     emit(state.copyWith(
-      dragEnabled: false,
       timerStatus: TimerStatus.paused,
     ));
     logger.d('Puased timer');
@@ -148,16 +152,16 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     logger.d('Puased timer');
   }
 
-  void _onResumeTimer(ResumeTimer event, Emitter<TimerState> emit) {
+  void _onResumeTimer(
+      ResumeHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) {
     state.sleepTimer.start();
     state.stopwatch.start();
-    add(StartCountdown(
-      state.countdownDuration,
-    ));
+    add(StartHomeWidgetCountdown(state.countdownDuration));
     emit(state.copyWith(timerStatus: TimerStatus.running));
   }
 
-  void _onStopTimer(StopTimer event, Emitter<TimerState> emit) async {
+  void _onStopTimer(
+      StopHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) async {
     state.sleepTimer.cancel();
     _cancelTimerBackgroundTask();
     state.countdownTimer.cancel();
@@ -167,25 +171,27 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     NotificationHandler.cancelTimerNotifications(
         _settingsBloc, state.sleepTimer, state.countdownDuration);
 
-    add(const ResetTimer());
+    add(const ResetHomeWidgetTimer());
     emit(
       state.copyWith(
         // enabling GaugeDragging again because the timer is free
-        dragEnabled: true,
+
         timerStatus: TimerStatus.stopped,
       ),
     );
     emit(state.copyWith(timerStatus: TimerStatus.stopped));
   }
 
-  void _onStopwatchStarted(StartStopwatch event, Emitter<TimerState> emit) {
+  void _onStopwatchStarted(
+      StartHomeWidgetStopwatch event, Emitter<HomeWidgetTimerState> emit) {
     state.stopwatch.start();
     emit(state.copyWith(
       stopwatch: state.stopwatch,
     ));
   }
 
-  void _onStarCountdown(StartCountdown event, Emitter<TimerState> emit) {
+  void _onStarCountdown(
+      StartHomeWidgetCountdown event, Emitter<HomeWidgetTimerState> emit) {
     // To avoid milli and microseconds to avoid ruining animations
     // as this method does not convert milli and microseconds
     emit(
@@ -194,7 +200,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         countdownTimer: Timer.periodic(
           const Duration(milliseconds: 1000),
           (timer) async {
-            add(ChangeCountdownDuration(
+            log('timer ticked');
+            add(ChangeHomeWidgetCountdownDuration(
               const Duration(milliseconds: 1000),
               timer,
             ));
@@ -204,23 +211,18 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     );
   }
 
-  void _onCountdownDurationChanged(
-      ChangeCountdownDuration event, Emitter<TimerState> emit) async {
+  void _onCountdownDurationChanged(ChangeHomeWidgetCountdownDuration event,
+      Emitter<HomeWidgetTimerState> emit) async {
     if (state.countdownDuration.inMilliseconds > 1000) {
       NotificationHandler.notifyTimerNotifications(
           _settingsBloc, event.timer, state.countdownDuration);
+      final countdownDuration = state.countdownDuration - event.duration;
       emit(
         state.copyWith(
-          countdownDuration: state.countdownDuration - event.duration,
+          countdownDuration: countdownDuration,
         ),
       );
     }
-  }
-
-  void _onSettingGaugeEndValue(
-      SetGaugeEndValue event, Emitter<TimerState> emit) {
-    emit(state.copyWith(
-        gaugeEndValue: event.duration.inSeconds.toDouble() / 60));
   }
 
   void _startTimerBackground(Duration duration, String taskId) {
@@ -266,7 +268,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     ));
   }
 
-  void _onTimerFinished(FinishTimer event, Emitter<TimerState> emit) async {
+  void _onTimerFinished(
+      FinishHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) async {
     await fadeOutAudio();
     await session.setActive(true);
     logger.d('Sleeping');
@@ -275,35 +278,24 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     state.countdownTimer.cancel();
     state.stopwatch.reset();
 
-    // on cancelling Timer we will need to get the stored [end_value] stored in [GetStorage]
-    await _getGaugeEndValueFromLocalStorage();
-
     _cancelTimerBackgroundTask();
 
-    add(const GoToHome());
-    add(const SetSilent());
-    add(const TurnScreenOff());
-    add(const ResetTimer());
+    add(HomeWidgetGoToHome());
+    add(const HomeWidgetSetSilent());
+    add(const HomeWidgetTurnScreenOff());
+    add(const ResetHomeWidgetTimer());
     turnOffBluetooth();
     turnOffWifi();
     // showing timer finished notifications
     NotificationHandler.finishTimerNotifications(
         _settingsBloc, state.sleepTimer, state.countdownDuration);
     emit(state.copyWith(
-      dragEnabled: true,
       timerStatus: TimerStatus.stopped,
     ));
   }
 
   void _cancelTimerBackgroundTask() {
-    Workmanager().cancelByUniqueName('app');
-  }
-
-  /// get the stored [end_value] stored in [GetStorage] to reset the [GaugeRange]
-  /// returns 91 if null
-  Future<double> _getGaugeEndValueFromLocalStorage() async {
-    final duration = await _timerService.duration;
-    return duration.inSeconds.toDouble() / 60;
+    Workmanager().cancelByUniqueName('homeWidget');
   }
 
   static void turnScreenOff() async {
@@ -347,8 +339,16 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
   }
 
-  void _onTimerReset(ResetTimer event, Emitter<TimerState> emit) async {
-    final Duration duration = await _timerService.duration;
+  void _onTimerReset(
+      ResetHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) async {
+    late final Duration duration;
+
+    logger.i('Resetting timer from home widget');
+    await _homeWidgettimerService.getWidgetTimer().then(
+      (value) {
+        duration = value.timerDuration;
+      },
+    );
 
     state.sleepTimer.reset();
     state.countdownTimer.cancel();
@@ -358,18 +358,18 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       state.copyWith(
         countdownDuration: duration,
         timerStatus: TimerStatus.stopped,
-        dragEnabled: true,
       ),
     );
   }
 
   @override
-  void onEvent(TimerEvent event) {
+  void onEvent(event) {
     super.onEvent(event);
     log('EVENT: $event');
   }
 
-  void _onTimerCanceled(CancelTimer event, Emitter<TimerState> emit) async {
+  void _onTimerCanceled(
+      CancelHomeWidgetTimer event, Emitter<HomeWidgetTimerState> emit) async {
     // resetting [countdownTimer] and  [stopWatch]
     state.countdownTimer.cancel();
     state.stopwatch.reset();
@@ -379,36 +379,37 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     NotificationHandler.cancelTimerNotifications(
         _settingsBloc, state.sleepTimer, state.countdownDuration);
     // final endValue = await _getGaugeEndValueFromLocalStorage();
-    add(const ResetTimer());
+    add(const ResetHomeWidgetTimer());
     emit(
       state.copyWith(
         // enabling GaugeDragging again because the timer is free
-        dragEnabled: true,
+
         timerStatus: TimerStatus.cancelled,
       ),
     );
   }
 
-  late final _settingsBloc = isRunningFromHomeWidget
-      ? SettingsBloc()
-      : NavigatorService.context.read<SettingsBloc>();
+  final _settingsBloc = SettingsBloc();
 
   /// exit the app without closing and go to home
-  void _onGoToHome(GoToHome event, Emitter<TimerState> emit) {
+  void _onGoToHome(
+      HomeWidgetGoToHome event, Emitter<HomeWidgetTimerState> emit) {
     if (_settingsBloc.state.goToHome) {
       SystemShortcuts.home();
     }
   }
 
   /// turn screen off
-  void _onTurnOffScreen(TurnScreenOff event, Emitter<TimerState> emit) {
+  void _onTurnOffScreen(
+      HomeWidgetTurnScreenOff event, Emitter<HomeWidgetTimerState> emit) {
     if (_settingsBloc.state.turnOffScreen) {
       turnScreenOff();
     }
   }
 
   /// sets the phone to silent mode if the user choosed that
-  void _onSetSilent(SetSilent event, Emitter<TimerState> emit) {
+  void _onSetSilent(
+      HomeWidgetSetSilent event, Emitter<HomeWidgetTimerState> emit) {
     if (_settingsBloc.state.silentMode) {
       try {
         SoundMode.setSoundMode(RingerModeStatus.silent);
@@ -416,67 +417,5 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         logger.d('Please enable permissions required');
       }
     }
-  }
-
-  void _onGaugeRangeChanged(ChangeGaugeRange event, Emitter<TimerState> emit) {
-    final duration = _calculateDuration(event.valueChangingArgs);
-    emit(state.copyWith(
-        countdownDuration: duration,
-        valueChangingArgs: event.valueChangingArgs));
-  }
-
-  Duration _calculateDuration(ValueChangingArgs args) {
-    // Duration does not accept minutes as double
-    return Duration(
-      minutes: args.value.toInt(),
-      seconds:
-          ((double.parse("0.${args.value.toString().split('.').elementAt(1)}") *
-                  60)
-              .round()),
-    );
-  }
-
-  void _onTimerExtend(ExtendTimer event, Emitter<TimerState> emit) {
-    if (event.duration.isNegative) {
-      logger.d('Shrinking Timer');
-      bool canShrink =
-          (state.countdownDuration - event.duration).isNegative == true
-              ? false
-              : true;
-      if (canShrink) {
-        final duration = state.countdownDuration + event.duration;
-        emit(
-          state.copyWith(countdownDuration: duration),
-        );
-        if (duration > const Duration(minutes: 90)) {
-          add(SetGaugeEndValue(duration));
-        }
-      } else {
-        showSnackBar('TimerCannotBeSetted'.tr);
-      }
-    } else {
-      logger.d('Extending Timer');
-      final duration = state.countdownDuration + event.duration;
-
-      emit(state.copyWith(countdownDuration: duration));
-      if (duration.inMinutes <= 90) {
-        /// this condition only extending timer but not with timer is running
-        add(const SetGaugeEndValue(Duration(minutes: 90)));
-      } else {
-        add(SetGaugeEndValue(duration));
-      }
-    }
-  }
-
-  double getInterval() {
-    final minutes = state.countdownDuration.inMinutes;
-    if (minutes > 1) {
-      return 10;
-    } else if (minutes <= 50) {
-      return 50;
-    } else if (minutes <= 90) {
-      return 10;
-    }
-    return 10;
   }
 }

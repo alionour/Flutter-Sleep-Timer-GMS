@@ -14,7 +14,9 @@ class StartTimer extends TimerEvent {
     required this.duration,
   });
   @override
-  List<Object> get props => [duration];
+  List<Object> get props => [
+        duration,
+      ];
 }
 
 class FinishTimer extends TimerEvent {
@@ -27,19 +29,37 @@ class FinishTimer extends TimerEvent {
   List<Object> get props => [duration];
 }
 
-class PauseTimer extends TimerEvent {}
+class PauseTimer extends TimerEvent {
+  const PauseTimer();
+}
 
-class ResumeTimer extends TimerEvent {}
+class ResumeTimer extends TimerEvent {
+  const ResumeTimer();
+}
 
-class CancelTimer extends TimerEvent {}
+class CancelTimer extends TimerEvent {
+  const CancelTimer();
+}
 
-class GoToHome extends TimerEvent {}
+class ResetTimer extends TimerEvent {
+  const ResetTimer();
+}
 
-class TurnScreenOff extends TimerEvent {}
+class GoToHome extends TimerEvent {
+  const GoToHome();
+}
 
-class SetSilent extends TimerEvent {}
+class TurnScreenOff extends TimerEvent {
+  const TurnScreenOff();
+}
 
-class StopTimer extends TimerEvent {}
+class SetSilent extends TimerEvent {
+  const SetSilent();
+}
+
+class StopTimer extends TimerEvent {
+  const StopTimer();
+}
 
 class ExtendTimer extends TimerEvent {
   final Duration duration;
@@ -50,7 +70,9 @@ class ExtendTimer extends TimerEvent {
 class StartCountdown extends TimerEvent {
   final Duration duration;
 
-  const StartCountdown(this.duration);
+  const StartCountdown(
+    this.duration,
+  );
   @override
   List<Object> get props => [duration];
 }
@@ -83,7 +105,10 @@ class ChangeCountdownDuration extends TimerEvent {
   final Duration duration;
   final Timer timer;
 
-  const ChangeCountdownDuration(this.duration, this.timer);
+  const ChangeCountdownDuration(
+    this.duration,
+    this.timer,
+  );
   @override
   List<Object> get props => [duration, timer];
 }

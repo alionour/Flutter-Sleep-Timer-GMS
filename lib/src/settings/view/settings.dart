@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:sleep_timer/src/app/services/ads/ads_controller.dart';
+import 'package:sleep_timer/src/app/services/background_tasks/services/timer_service.dart';
 import 'package:sleep_timer/src/settings/bloc/settings_bloc.dart';
+import 'package:sleep_timer/src/settings/widgets/duration_picker.dart';
 import 'package:sleep_timer/src/settings/widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -252,6 +254,20 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       );
                     }),
+                    BlocBuilder<SettingsBloc, SettingsState>(
+                        builder: (context, state) {
+                      return Tooltip(
+                        message: "sets home widget timer's duration .",
+                        triggerMode: TooltipTriggerMode.tap,
+                        child: ListTile(
+                          onTap: () {
+                            showHomeWidgetDurationPicker();
+                          },
+                          leading: const Icon(Icons.widgets_rounded),
+                          title: Text('HomeWidgetTimerDuration'.tr),
+                        ),
+                      );
+                    }),
                   ],
                 )),
             Positioned(
@@ -266,5 +282,28 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+  void showHomeWidgetDurationPicker() async {
+    showDurationPicker(
+            context: context, initialTime: const Duration(minutes: 1))
+        .then((value) async {
+      final service = HomeWidgetTimerService();
+      await service.updateDuration(value!);
+    });
+    // showDialog(
+    //   context: NavigatorService.context,
+    //   builder: (context) => Dialog(
+    //     child: Center(
+    //         child: DurationPicker(
+    //       duration: const Duration(minutes: 1),
+    //       onChange: (value) async {
+    //         final service = HomeWidgetTimerService();
+    //         await service.updateDuration(value);
+    //       },
+    //     )),
+
+    //   ),
+    // );
   }
 }

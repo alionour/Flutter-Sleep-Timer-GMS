@@ -18,4 +18,8 @@ Map<String, String> ar = {
   'GeneralSettings': 'الاعدادات العامة',
   'TimerSettings': 'إعدادات المؤقت',
   'SilentMode': 'الوضع الصامت',
+  'Theme': 'الثمة',
+  'TurnOffWifi': 'أطفئ ال wifi',
+  'TurnOffBluetooth': 'أطفئ Bluetooth',
+  'HomeWidgetTimerDuration': 'مدة الإعداد المؤقت للشاشة الرئيسية الرئيسية',
 };

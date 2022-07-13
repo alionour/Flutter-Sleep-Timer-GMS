@@ -6,13 +6,11 @@ import 'package:home_widget/home_widget.dart';
 import 'package:lecle_system_shortcuts/lecle_system_shortcuts.dart';
 import 'package:sleep_timer/src/app/services/ads/ads_controller.dart';
 import 'package:sleep_timer/src/app/services/ads/open_app_ad.dart';
-import 'package:sleep_timer/src/app/services/background_tasks/background_tasks.dart';
 import 'package:sleep_timer/src/app/services/rate_app/rate_app.dart';
 import 'package:sleep_timer/src/home/bloc/home_bloc.dart';
 import 'package:sleep_timer/src/home/view/home_landscape.dart';
 import 'package:sleep_timer/src/home/view/home_portrait.dart';
 import 'package:sleep_timer/src/timer/bloc/timer_bloc.dart';
-import 'package:workmanager/workmanager.dart';
 
 extension TimesRepeat on AnimationController {
   void repeatTimes(int times) async {
@@ -47,8 +45,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    HomeWidget.setAppGroupId('YOUR_GROUP_ID');
-    HomeWidget.registerBackgroundCallback(backgroundCallback);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await initializeRateMyApp();
       if (mounted) {
@@ -113,22 +110,14 @@ class _HomePageState extends State<HomePage> {
       print('widgetClicked: $uri');
     });
   }
-
-  void _startBackgroundUpdate() {
-    Workmanager().registerPeriodicTask('1', 'widgetBackgroundUpdate',
-        frequency: const Duration(minutes: 15));
-  }
-
-  void _stopBackgroundUpdate() {
-    Workmanager().cancelByUniqueName('1');
-  }
 }
 
 Widget startTimer(TimerBloc timerBloc) => Padding(
       padding: const EdgeInsets.only(top: 50, bottom: 20),
       child: GestureDetector(
-          onTap: () => timerBloc
-              .add(StartTimer(duration: timerBloc.state.countdownDuration)),
+          onTap: () => timerBloc.add(StartTimer(
+                duration: timerBloc.state.countdownDuration,
+              )),
           child: const CircleAvatar(
             radius: 30,
             // backgroundColor: isDarkTheme.value
@@ -145,7 +134,7 @@ Widget startTimer(TimerBloc timerBloc) => Padding(
 Widget resumeTimer(TimerBloc timerBloc) => Padding(
       padding: const EdgeInsets.only(top: 50, bottom: 20),
       child: GestureDetector(
-        onTap: () => timerBloc.add(ResumeTimer()),
+        onTap: () => timerBloc.add(const ResumeTimer()),
         child: CircleAvatar(
           radius: 30,
           // backgroundColor: isDarkTheme.value
@@ -165,7 +154,7 @@ Widget resumeTimer(TimerBloc timerBloc) => Padding(
 Widget cancelTimer(TimerBloc timerBloc) => Padding(
       padding: const EdgeInsets.only(top: 50, bottom: 20),
       child: GestureDetector(
-        onTap: () => timerBloc.add(CancelTimer()),
+        onTap: () => timerBloc.add(const CancelTimer()),
         child: const CircleAvatar(
           radius: 30,
           // backgroundColor: isDarkTheme.value
@@ -183,7 +172,9 @@ Widget cancelTimer(TimerBloc timerBloc) => Padding(
 Widget pauseTimer(TimerBloc timerBloc) => Padding(
       padding: const EdgeInsets.only(top: 50, bottom: 20),
       child: GestureDetector(
-        onTap: () => timerBloc.add(PauseTimer()),
+        onTap: () => timerBloc.add(
+          const PauseTimer(),
+        ),
         child: const CircleAvatar(
           radius: 30,
           child: Icon(

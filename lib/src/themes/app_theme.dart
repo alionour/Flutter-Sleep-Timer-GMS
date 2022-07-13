@@ -51,7 +51,11 @@ abstract class AppTheme extends Equatable {
       iconTheme: IconThemeData(
         color: palette.iconColor,
       ),
-      textTheme: const TextTheme(),
+      textTheme: TextTheme(
+        headline2: TextStyle(fontFamily: 'Tajawal', color: palette.appBarColor),
+        subtitle1: TextStyle(fontFamily: 'Tajawal', color: palette.appBarColor),
+        bodyText2: TextStyle(fontFamily: 'Tajawal', color: palette.appBarColor),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: palette.appBarColor,
         centerTitle: true,

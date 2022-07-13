@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:sleep_timer/src/app/services/navigation/navigation.dart';
+import 'package:sleep_timer/src/settings/bloc/settings_bloc.dart';
 
 class NotificationHandler {
-  static void cancelTimerNotifications(Timer timer, Duration duration) async {
-    if (NavigatorService.settingsBloc.state.notification) {
+  static void cancelTimerNotifications(
+      SettingsBloc settingsBloc, Timer timer, Duration duration) async {
+    if (settingsBloc.state.notification) {
       AndroidNotificationDetails androidNotificationDetails =
           AndroidNotificationDetails('2003', 'Sleep Timer',
               channelDescription: 'Timer is On',
@@ -31,8 +32,9 @@ class NotificationHandler {
     }
   }
 
-  static void notifyTimerNotifications(Timer timer, Duration duration) async {
-    if (NavigatorService.settingsBloc.state.notification) {
+  static void notifyTimerNotifications(
+      SettingsBloc settingsBloc, Timer timer, Duration duration) async {
+    if (settingsBloc.state.notification) {
       // log('${timer.tick}  ${duration.inSeconds}');
       AndroidNotificationDetails androidNotificationDetails =
           AndroidNotificationDetails('2003', 'Sleep Timer',
@@ -61,8 +63,9 @@ class NotificationHandler {
     }
   }
 
-  static void finishTimerNotifications(Timer timer, Duration duration) async {
-    if (NavigatorService.settingsBloc.state.notification) {
+  static void finishTimerNotifications(
+      SettingsBloc settingsBloc, Timer timer, Duration duration) async {
+    if (settingsBloc.state.notification) {
       AndroidNotificationDetails androidNotificationDetails =
           const AndroidNotificationDetails('2003', 'Sleep Timer',
               channelDescription: 'Timer is On',

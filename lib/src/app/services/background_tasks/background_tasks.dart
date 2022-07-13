@@ -4,7 +4,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
+import 'package:sleep_timer/src/app/services/background_tasks/bloc/home_widget_timer_bloc.dart';
 import 'package:sleep_timer/src/app/services/navigation/navigation.dart';
+import 'package:sleep_timer/src/app/services/services.dart';
+import 'package:sleep_timer/src/globals.dart';
 
 final service = FlutterBackgroundService();
 
@@ -108,46 +111,27 @@ enum HomeTimerWidgetAction {
   }
 }
 
+final HomeWidgetTimerBloc homeWidgetTimerBloc = HomeWidgetTimerBloc();
+
 /// Called when Doing Background Work initiated from Widget
-void backgroundCallback(Uri? data) async {
+void homeWidgetBackgroundCallback(Uri? data) async {
   print('data$data');
+  await initializeLocalStorage();
+
   switch (HomeTimerWidgetAction.action(data?.host)) {
     case HomeTimerWidgetAction.start:
+      logger.i('HomeWidgetBackgroundCallback: start');
+      homeWidgetTimerBloc.add(const StartHomeWidgetTimer());
       break;
-
     case HomeTimerWidgetAction.pause:
+      logger.i('HomeWidgetBackgroundCallback: pause');
+      homeWidgetTimerBloc.add(const PauseHomeWidgetTimer());
       break;
 
     case HomeTimerWidgetAction.reset:
+      logger.i('HomeWidgetBackgroundCallback: reset');
+      homeWidgetTimerBloc.add(const CancelHomeWidgetTimer());
       break;
     default:
   }
-  // if (HomeTimerWidgetAction.action(data?.host) == HomeTimerWidgetAction.start) {
-  //   await HomeWidget.saveWidgetData<String>('title', '');
-  //   await HomeWidget.updateWidget(
-  //       name: 'HomeWidgetExampleProvider', iOSName: 'HomeWidgetExample');
-  // }
 }
-
-/// Used for Background Updates using Workmanager Plugin
-// void callbackDispatcher() {
-//   Workmanager().executeTask((taskName, inputData) {
-//     final now = DateTime.now();
-//     return Future.wait<bool>([
-//       HomeWidget.saveWidgetData(
-//         'title',
-//         'Updated from Background',
-//       ) as Future<bool>,
-//       HomeWidget.saveWidgetData(
-//         'message',
-//         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}',
-//       ) as Future<bool>,
-//       HomeWidget.updateWidget(
-//         name: 'HomeWidgetExampleProvider',
-//         iOSName: 'HomeWidgetExample',
-//       ) as Future<bool>,
-//     ]).then((value) {
-//       return !value.contains(false);
-//     });
-//   });
-// }

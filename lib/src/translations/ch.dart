@@ -18,4 +18,8 @@ Map<String, String> ch = {
   'GeneralSettings': '常規設置',
   'TimerSettings': '定時器設置',
   'SilentMode': '靜音模式',
+  'Theme': '主題',
+  'TurnOffWifi': '關閉 wifi',
+  'TurnOffBluetooth': '關閉藍芽',
+  'HomeWidgetTimerDuration': '主頁小部件定時器持續時間',
 };
