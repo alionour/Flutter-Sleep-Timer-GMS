@@ -6,7 +6,6 @@ abstract class TimerState extends Equatable {
   final double gaugeEndValue;
   final bool dragEnabled;
   final Timer countdownTimer;
-  final PausableTimer sleepTimer;
   final Stopwatch stopwatch;
 
   /// needle pinter
@@ -16,7 +15,6 @@ abstract class TimerState extends Equatable {
       required this.countdownDuration,
       required this.gaugeEndValue,
       required this.countdownTimer,
-      required this.sleepTimer,
       required this.stopwatch,
       required this.dragEnabled,
       required this.valueChangingArgs});
@@ -26,7 +24,6 @@ abstract class TimerState extends Equatable {
         timerStatus,
         countdownDuration,
         gaugeEndValue,
-        sleepTimer,
         countdownTimer,
         stopwatch,
         dragEnabled,
@@ -38,7 +35,6 @@ abstract class TimerState extends Equatable {
     Duration? countdownDuration,
     double? gaugeEndValue,
     Stopwatch? stopwatch,
-    PausableTimer? sleepTimer,
     Timer? countdownTimer,
     bool? dragEnabled,
     ValueChangingArgs? valueChangingArgs,
@@ -51,7 +47,6 @@ class HomeInitial extends TimerState {
     required Duration countdownDuration,
     required double gaugeEndValue,
     required Timer countdownTimer,
-    required PausableTimer sleepTimer,
     required Stopwatch stopwatch,
     required bool dragEnabled,
     required ValueChangingArgs valueChangingArgs,
@@ -60,7 +55,6 @@ class HomeInitial extends TimerState {
             countdownDuration: countdownDuration,
             gaugeEndValue: gaugeEndValue,
             countdownTimer: countdownTimer,
-            sleepTimer: sleepTimer,
             stopwatch: stopwatch,
             dragEnabled: dragEnabled,
             valueChangingArgs: valueChangingArgs);
@@ -71,7 +65,6 @@ class HomeInitial extends TimerState {
       Duration? countdownDuration,
       double? gaugeEndValue,
       Stopwatch? stopwatch,
-      PausableTimer? sleepTimer,
       Timer? countdownTimer,
       bool? dragEnabled,
       ValueChangingArgs? valueChangingArgs}) {
@@ -80,7 +73,6 @@ class HomeInitial extends TimerState {
         countdownDuration: countdownDuration ?? this.countdownDuration,
         gaugeEndValue: gaugeEndValue ?? this.gaugeEndValue,
         countdownTimer: countdownTimer ?? this.countdownTimer,
-        sleepTimer: sleepTimer ?? this.sleepTimer,
         stopwatch: stopwatch ?? this.stopwatch,
         dragEnabled: dragEnabled ?? this.dragEnabled,
         valueChangingArgs: valueChangingArgs ?? this.valueChangingArgs);
@@ -93,7 +85,6 @@ class HomeStateChanged extends TimerState {
     required Duration countdownDuration,
     required double gaugeEndValue,
     required Timer countdownTimer,
-    required PausableTimer sleepTimer,
     required Stopwatch stopwatch,
     required bool dragEnabled,
     required ValueChangingArgs valueChangingArgs,
@@ -102,7 +93,6 @@ class HomeStateChanged extends TimerState {
             countdownDuration: countdownDuration,
             gaugeEndValue: gaugeEndValue,
             countdownTimer: countdownTimer,
-            sleepTimer: sleepTimer,
             stopwatch: stopwatch,
             dragEnabled: dragEnabled,
             valueChangingArgs: valueChangingArgs);
@@ -113,7 +103,6 @@ class HomeStateChanged extends TimerState {
     Duration? countdownDuration,
     double? gaugeEndValue,
     Stopwatch? stopwatch,
-    PausableTimer? sleepTimer,
     Timer? countdownTimer,
     bool? dragEnabled,
     ValueChangingArgs? valueChangingArgs,
@@ -123,7 +112,6 @@ class HomeStateChanged extends TimerState {
         countdownDuration: countdownDuration ?? this.countdownDuration,
         gaugeEndValue: gaugeEndValue ?? this.gaugeEndValue,
         countdownTimer: countdownTimer ?? this.countdownTimer,
-        sleepTimer: sleepTimer ?? this.sleepTimer,
         stopwatch: stopwatch ?? this.stopwatch,
         dragEnabled: dragEnabled ?? this.dragEnabled,
         valueChangingArgs: valueChangingArgs ?? this.valueChangingArgs);

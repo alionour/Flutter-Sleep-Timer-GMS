@@ -126,6 +126,10 @@
         </receiver> 
 
 
+        <service
+            android:name="id.flutter.flutter_background_service.BackgroundService"
+            android:foregroundServiceType="mediaPlayback" />
+
         <receiver
             android:name="device.policy.manager.DeviceAdmin"
             android:permission="android.permission.BIND_DEVICE_ADMIN"

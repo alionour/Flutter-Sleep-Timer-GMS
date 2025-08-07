@@ -74,7 +74,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
             stopwatch: Stopwatch(),
             gaugeEndValue: initialDuration.inSeconds.toDouble() / 60,
             countdownTimer: Timer(initialDuration, () {}),
-            sleepTimer: PausableTimer(initialDuration, () {}),
             valueChangingArgs: ValueChangingArgs(),
           ),
         ) {
@@ -116,16 +115,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
       _startTimerBackground(event.duration, 'app');
 
-      final sleepTimer = PausableTimer(event.duration, () async {
-        logger.d('Timer has been finished');
-        add(FinishTimer(
-          duration: event.duration,
-        ));
-      })
-        ..start();
       emit(
         state.copyWith(
-            sleepTimer: sleepTimer,
             dragEnabled: false,
             timerStatus: TimerStatus.running),
       );
@@ -134,7 +125,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   void _onPauseTimer(PauseTimer event, Emitter<TimerState> emit) {
     logger.d('Pausing timer');
-    state.sleepTimer.pause();
     state.stopwatch.stop();
     state.countdownTimer.cancel();
     _cancelTimerBackgroundTask();
@@ -149,7 +139,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   void _onResumeTimer(ResumeTimer event, Emitter<TimerState> emit) {
-    state.sleepTimer.start();
     state.stopwatch.start();
     add(StartCountdown(
       state.countdownDuration,
@@ -158,7 +147,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   void _onStopTimer(StopTimer event, Emitter<TimerState> emit) async {
-    state.sleepTimer.cancel();
     _cancelTimerBackgroundTask();
     state.countdownTimer.cancel();
     state.stopwatch.reset();
@@ -350,7 +338,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   void _onTimerReset(ResetTimer event, Emitter<TimerState> emit) async {
     final Duration duration = await _timerService.duration;
 
-    state.sleepTimer.reset();
     state.countdownTimer.cancel();
     state.stopwatch.reset();
 
@@ -373,11 +360,10 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     // resetting [countdownTimer] and  [stopWatch]
     state.countdownTimer.cancel();
     state.stopwatch.reset();
-    state.sleepTimer.cancel();
     _cancelTimerBackgroundTask();
     // showing timer cancellation notifications
     NotificationHandler.cancelTimerNotifications(
-        _settingsBloc, state.sleepTimer, state.countdownDuration);
+        _settingsBloc, state.countdownDuration);
     // final endValue = await _getGaugeEndValueFromLocalStorage();
     add(const ResetTimer());
     emit(
